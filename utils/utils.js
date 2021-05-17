@@ -1,20 +1,16 @@
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTERNAL_SERVER_ERROR = 500;
+const BadRequestError = require('../errors/bad-request-err');
+const NotFoundError = require('../errors/not-found-err');
+const ServerError = require('../errors/server-err');
 
 function errorOutput(err, res) {
   if (err.name === 'ValidationError' || err.name === 'CastError') {
-    res.status(BAD_REQUEST).send({ message: 'Неверные данные' });
-    return;
+    throw new BadRequestError(err.message);
   }
-  if (err.message === 'invalidUserId') {
-    res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
-    return;
+  if (err.message === 'invalidUserId' || err.message === 'invalidCardId') {
+    throw new NotFoundError(err.message);
   }
-  if (err.message === 'invalidCardId') {
-    res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-    return;
-  } res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+
+  throw new ServerError(err.message);
 }
 
 module.exports = { errorOutput };
