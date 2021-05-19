@@ -23,6 +23,11 @@
     "celebrate": "^14.0.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+<<<<<<< HEAD
+=======
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+>>>>>>> 8c856cbb7d76329502e0cf9947a1d51ecd8c14fb
     "express": "^4.17.1",
     "express-validator": "^6.11.1",
     "helmet": "^4.6.0",

@@ -32,16 +32,31 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.post('/signup', signupValidation, createUser);
 app.post('/signin', signinValidation, login);
+<<<<<<< HEAD
+=======
+
+app.post('/signup', createUser);
+app.post('/signin', login);
+>>>>>>> 8c856cbb7d76329502e0cf9947a1d51ecd8c14fb
 
 app.use('/users', auth, users);
 app.use('/cards', auth, cards);
 
+<<<<<<< HEAD
 app.use(errors());
 
 app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 
+=======
+app.use('*', () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+});
+
+app.use(errors());
+
+>>>>>>> 8c856cbb7d76329502e0cf9947a1d51ecd8c14fb
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(err.statusCode).send({ message: statusCode === 500 ? 'Что-то пошло не так' : message });
