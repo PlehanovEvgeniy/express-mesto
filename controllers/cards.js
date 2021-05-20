@@ -1,40 +1,40 @@
 const Card = require('../models/card');
-const { errorOutput } = require('../utils/utils');
+const BadRequestError = require('../errors/bad-request-err');
+const ForbiddenError = require('../errors/forbidden-err');
+const NotFoundError = require('../errors/not-found-err');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res
-      .status(200)
-      .send({ data: cards }))
-    .catch((err) => errorOutput(err, res))
+    .then((data) => res.status(200).send({ data }))
     .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res
-      .status(200)
-      .send({ data: card }))
-    .catch((err) => errorOutput(err, res))
+    .then((data) => res.status(200).send({ data }))
+    .catch(() => {
+      throw new BadRequestError('Переданы неверные данные при создании карточки');
+    })
     .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => new Error('invalidCardId'))
-    .then((card) => {
-      if (card.owner._id !== req.user._id) {
-        return res
-          .status(403)
-          .send({ message: 'Нет доступа' });
-      }
-
-      return res
-        .status(200)
-        .send({ data: card });
+  Card.findById(req.params.cardId)
+    .orFail(() => {
+      throw new Error('invalidUserId');
     })
-    .catch((err) => errorOutput(err, res))
+    .then((data) => {
+      if (data.owner._id !== req.user._id) {
+        throw new ForbiddenError('Чужие карточки нельзя удалять');
+      }
+      Card.findByIdAndRemove(req.params.cardId)
+        .then((newCard) => res.status(200).send({ data: newCard }))
+        .catch(next);
+    })
+    .catch((err) => {
+      throw new NotFoundError(err.message);
+    })
     .catch(next);
 };
 
@@ -42,11 +42,16 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true })
-    .orFail(() => new Error('invalidCardId'))
-    .then((card) => res
-      .status(200)
-      .send({ data: card }))
-    .catch((err) => errorOutput(err, res))
+    .orFail(() => {
+      throw new Error('invalidUserId');
+    })
+    .then((data) => res.status(200).send({ data }))
+    .catch((err) => {
+      if (err.message === 'NotFound') {
+        throw new NotFoundError(err.message);
+      }
+      throw new BadRequestError('Переданы неверные данные при лайке карточки');
+    })
     .catch(next);
 };
 
@@ -54,10 +59,17 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true })
-    .orFail(() => new Error('invalidCardId'))
-    .then((card) => res
+    .orFail(() => {
+      throw new Error('invalidUserId');
+    })
+    .then((data) => res
       .status(200)
-      .send({ data: card }))
-    .catch((err) => errorOutput(err, res))
+      .send({ data }))
+    .catch((err) => {
+      if (err.message === 'NotFound') {
+        throw new NotFoundError(err.message);
+      }
+      throw new BadRequestError('Переданы неверные данные при дизлайке карточки');
+    })
     .catch(next);
 };
