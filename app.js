@@ -4,8 +4,8 @@ const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
 const cors = require('cors');
-const cards = require('./routes/cards');
 const users = require('./routes/users');
+const cards = require('./routes/cards');
 const NotFoundError = require('./errors/not-found-err');
 
 const { createUser, login } = require('./controllers/users');
