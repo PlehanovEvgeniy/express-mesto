@@ -13,8 +13,8 @@ const {
 
 cards.get('/', getCards);
 cards.post('/', cardValidation, createCard);
-cards.delete('/:cardId', idValidation, deleteCard);
-cards.put('/:cardId/likes', idValidation, likeCard);
-cards.delete('/:cardId/likes', idValidation, dislikeCard);
+cards.delete('/:id', idValidation, deleteCard);
+cards.put('/:id/likes', idValidation, likeCard);
+cards.delete('/:id/likes', idValidation, dislikeCard);
 
 module.exports = cards;

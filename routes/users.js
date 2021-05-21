@@ -16,7 +16,7 @@ const {
 
 users.get('/', getUsers);
 users.post('/', createUser);
-users.get('/:_id', idValidation, getUser);
+users.get('/:id', idValidation, getUser);
 users.get('/me', idValidation, getUserInfo);
 users.patch('/me', userInfoValidation, updateUserInfo);
 users.patch('/me/avatar', userAvatarValidation, updateAvatar);

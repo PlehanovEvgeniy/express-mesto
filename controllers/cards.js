@@ -13,23 +13,26 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((data) => res.status(200).send({ data }))
-    .catch(() => {
-      throw new BadRequestError('Переданы неверные данные при создании карточки');
+    .catch((err) => {
+      throw new BadRequestError(err.message);
     })
     .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Card.findById(req.params.id)
     .orFail(() => {
       throw new Error('invalidUserId');
     })
     .then((data) => {
-      if (data.owner._id !== req.user._id) {
+      if (data.owner._id.toString() !== req.user._id.toString()) {
         throw new ForbiddenError('Чужие карточки нельзя удалять');
       }
-      Card.findByIdAndRemove(req.params.cardId)
+      Card.findByIdAndRemove(req.params.id)
         .then((newCard) => res.status(200).send({ data: newCard }))
+        .catch((err) => {
+          throw new NotFoundError(err.message);
+        })
         .catch(next);
     })
     .catch((err) => {
@@ -39,11 +42,11 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(req.params.cardId,
+  Card.findByIdAndUpdate(req.params.id,
     { $addToSet: { likes: req.user._id } },
     { new: true })
     .orFail(() => {
-      throw new Error('invalidUserId');
+      throw new Error('NotFound');
     })
     .then((data) => res.status(200).send({ data }))
     .catch((err) => {
@@ -56,11 +59,11 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(req.params.cardId,
+  Card.findByIdAndUpdate(req.params.id,
     { $pull: { likes: req.user._id } },
     { new: true })
     .orFail(() => {
-      throw new Error('invalidUserId');
+      throw new Error('NotFound');
     })
     .then((data) => res
       .status(200)

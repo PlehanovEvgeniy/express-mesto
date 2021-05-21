@@ -30,9 +30,9 @@ module.exports.getUserInfo = (req, res, next) => {
 };
 
 module.exports.getUser = (req, res, next) => {
-  User.findById(req.params._id)
+  User.findById(req.params.id)
     .orFail(() => {
-      throw new Error('Такого пользователя не существует');
+      throw new Error('NotFound');
     })
     .then((data) => res.status(200).send({ data }))
     .catch((err) => {
@@ -51,7 +51,7 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    throw new BadRequestError('Неверная почта или пароль');
+    throw new NotFoundError('Неверная почта или пароль');
   }
 
   bcrypt.hash(password, 10)
