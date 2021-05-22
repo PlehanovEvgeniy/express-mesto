@@ -7,6 +7,7 @@ const cors = require('cors');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
 const NotFoundError = require('./errors/not-found-err');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -30,11 +31,15 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
+app.use(requestLogger);
+
 app.post('/signup', signupValidation, createUser);
 app.post('/signin', signinValidation, login);
 
 app.use('/users', auth, users);
 app.use('/cards', auth, cards);
+
+app.use(errorLogger);
 
 app.use(errors());
 
